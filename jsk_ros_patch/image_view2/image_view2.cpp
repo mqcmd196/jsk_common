@@ -45,6 +45,7 @@ namespace image_view2{
       left_button_clicked_(false), continuous_ready_(false), window_initialized_(false),
       line_select_start_point_(true), line_selected_(false), poly_selecting_done_(true)
   {
+    ROS_INFO("initializing image_view2...");
     std::string camera = nh.resolveName("image");
     std::string camera_info = nh.resolveName("camera_info");
     ros::NodeHandle local_nh("~");
@@ -122,6 +123,7 @@ namespace image_view2{
       [this](auto& config, auto level){ config_callback(config, level); };
 #endif
     srv_->setCallback(f);
+    ROS_INFO("image_view2 initialized");
   }
 
   ImageView2::~ImageView2()
@@ -1703,11 +1705,13 @@ namespace image_view2{
       if (!window_initialized_) {
         cv::namedWindow(window_name_.c_str(), autosize_ ? CV_WINDOW_AUTOSIZE : 0);
         cv::setMouseCallback(window_name_.c_str(), &ImageView2::mouseCb, this);
-        window_initialized_ = false;
+        window_initialized_ = true;
       }
       if(!image_.empty()) {
-        cv::imshow(window_name_.c_str(), image_);
-        cv::waitKey(3);
+        boost::mutex::scoped_lock lock(image_mutex_);
+        cv::Mat img;
+        image_.copyTo(img);
+        cv::imshow(window_name_.c_str(), img);
       }
     }
   }

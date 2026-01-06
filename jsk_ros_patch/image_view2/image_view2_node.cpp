@@ -49,9 +49,9 @@ int main(int argc, char **argv)
   image_view2::ImageView2 view(n);
   spinner.start();
   while (ros::ok()) {
+    view.showImage();
     int key = cv::waitKey(1000 / 30);
     view.pressKey(key);
-    view.showImage();
   }
   return 0;
 }
